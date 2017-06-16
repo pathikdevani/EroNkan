@@ -15,17 +15,17 @@
 <br>
 
 <!--2. select religion-->
-<label for="religion"></label>
+<label for="religion">Select religion Type : </label>
 <select name="religion" id="religion"></select>
 <br>
 
 <!--3. select courses-->
-<label for="courses"></label>
+<label for="courses">Select courses Type : </label>
 <select name="courses" id="courses"></select>
 <br>
 
 <!--4. select level-->
-<label for="level"></label>
+<label for="level">Select level Type : </label>
 <select name="level" id="level"></select>
 <br>
 
@@ -38,7 +38,159 @@
 <!--write js for task-->
 <script type="text/javascript">
     $(document).ready(function () {
+        var $fees = $("#fees");
+        var $religion = $("#religion");
+        var $courses = $("#courses");
+        var $level = $("#level");
+        var $ans = $("#ans");
 
+        //init element in fees select box
+        $fees.append($("<option>", {text: "Select fees type", val: ""}));
+
+
+        //add fees type
+        $.each(data, function (key) {
+            $fees.append($("<option>", {
+                value: key,
+                text: key
+            }));
+        });
+
+        //on fees change add religion options
+        $fees.on({
+            change: function () {
+
+                //empty first because some old options may be present
+                $religion.empty();
+                $religion.append($("<option>", {text: "Select religion type", val: ""}));
+
+                $.each(data[$fees.val()], function (key) {
+                    $religion.append($("<option>", {
+                        text: key,
+                        value: key
+                    }));
+                });
+                printAns();
+            }
+        });
+
+
+        //on religion change add course options
+        $religion.on({
+            change: function () {
+                $courses.empty();
+                $courses.append($("<option>", {text: "Select courses type", val: ""}));
+
+                var feesData = data[$fees.val()];
+                //check selected fees in data
+                if (feesData) {
+                    var religionData = feesData[$religion.val()];
+
+
+                    if (religionData["ALL_COURSES"]) {
+                        //if ALL_COURSES present : consider three course Medical, Dental, Ayurveda
+                        $.each(["Medical", "Dental", "Ayurveda"], function (i, val) {
+                            $courses.append($("<option>", {
+                                text: val,
+                                val: "ALL_COURSES"
+                            }))
+                        });
+                    } else {
+                        //ALL_COURSES not present
+                        $.each(religionData, function (key) {
+                            $courses.append($("<option>", {
+                                text: key,
+                                val: key
+                            }));
+                        });
+                    }
+                }
+
+                //log ans
+                printAns();
+            }
+        });
+
+
+        //on courses change add options to level
+        $courses.on({
+            change: function () {
+                $level.empty();
+                $level.append($("<option>", {text: "Select level", val: ""}));
+
+                var feesData = data[$fees.val()];
+                if (feesData) {
+                    var religionData = feesData[$religion.val()];
+                    if (religionData) {
+                        var courseType = religionData[$courses.val()];
+                        if (courseType) {
+                            var allLevel = courseType["ALL_LEVEL"];
+
+                            //if all level present then consider level as UG, PG, DIPLOMA, Ph.D
+                            if (allLevel) {
+                                $.each(["PG", "UG", "DIPLOMA", "Ph.D"], function (i, val) {
+                                    $level.append($("<option>", {
+                                        val: allLevel.amount,
+                                        text: val
+                                    }));
+                                });
+                            } else {
+                                $.each(courseType, function (key, val) {
+                                    $level.append($("<option>", {
+                                        val: val.amount,
+                                        text: key
+                                    }));
+                                });
+                            }
+                        }
+                    }
+                }
+                printAns();
+            }
+        });
+
+        //on change level print ans
+        $level.on({
+            change: function () {
+                printAns();
+            }
+        });
+
+        function printAns() {
+            var feesData = data[$fees.val()];
+            var ans;
+
+            if (feesData) {
+                var religionData = feesData[$religion.val()];
+                if (religionData) {
+                    var coursesData = religionData[$courses.val()];
+                    if (coursesData) {
+                        var level = $level.val();
+                        if (level !== "") {
+                            ans = "fees is : " + level;
+                        } else {
+                            //when select first dummy  option
+                            ans = "first select level!!";
+                        }
+                    } else {
+                        ans = "first select courses!!";
+                    }
+                } else {
+                    ans = "first select religion type!!";
+                }
+            } else {
+                ans = "first select fees type!!";
+            }
+
+            //set span text
+            $ans.text(ans);
+        }
+
+
+        //first change trigger for add dummy options
+        $fees.trigger("change");
+        $religion.trigger("change");
+        $courses.trigger("change");
     });
 </script>
 </body>
