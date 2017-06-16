@@ -2,4 +2,4 @@
    run comnnad ``git clone``
 
 ## Run project
-   open [index.html](index.html) fine in Chrome, Firefox or any other browser.
+   Open [index.html](index.html) file in Chrome, Firefox or any other browser.
